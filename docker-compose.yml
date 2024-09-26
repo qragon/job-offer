@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+    nginx:
+        build:
+            context: ./
+            dockerfile: docker/nginx/Dockerfile
+        volumes:
+            - ./:/app:delegated
+        depends_on:
+            - php-fpm
+        ports:
+            - 8080:80
+    php-fpm:
+        build:
+            context: ./
+            dockerfile: docker/php-fpm/Dockerfile
+        volumes:
+            - ./:/app
+        environment:
+            PHP_IDE_CONFIG: "serverName=xdebug-docker"
+        extra_hosts:
+            - host.docker.internal:host-gateway
+    php-cli:
+        build:
+            context: ./
+            dockerfile: docker/php-cli/Dockerfile
+        volumes:
+            - ./:/app
+            - composer:/root/.composer/cache
+        environment:
+            PHP_IDE_CONFIG: "serverName=xdebug-docker"
+        extra_hosts:
+            - host.docker.internal:host-gateway
+    node:
+        image: node:lts
+        volumes:
+            - ./:/app
+        working_dir: /app
+volumes:
+    composer:
